@@ -15,18 +15,36 @@ try {
   assert.ok(!archive.files.some(file => file.path.startsWith('src/') || file.path.startsWith('node_modules/')));
   const consumer = join(temporary, 'consumer');
   await mkdir(consumer);
-  await writeFile(join(consumer, 'package.json'), JSON.stringify({ name: 'correspondence-consumer', private: true, type: 'module' }));
-  execFileSync('npm', ['install', '--offline', '--no-audit', '--no-fund', join(temporary, archive.filename)],
-    { cwd: consumer, stdio: 'pipe' });
+  const archivePath = join(temporary, archive.filename);
+  const packageManifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
+  const rootLock = JSON.parse(await readFile(join(root, 'package-lock.json'), 'utf8'));
+  const consumerManifest = { name: 'correspondence-consumer', version: '1.0.0', private: true, type: 'module',
+    dependencies: { [packageManifest.name]: `file:${archivePath}` } };
+  await writeFile(join(consumer, 'package.json'), JSON.stringify(consumerManifest));
+  // npm ci caches exact tarballs, not necessarily registry packuments. Retain its exact production
+  // closure so this second install needs no metadata request and still tests the real pinned SDK.
+  const production = Object.fromEntries(Object.entries(rootLock.packages).filter(([path, item]) => path && !item.dev));
+  const packages = { '': { name: consumerManifest.name, version: consumerManifest.version, dependencies: consumerManifest.dependencies },
+    ...production, [`node_modules/${packageManifest.name}`]: { version: packageManifest.version,
+      resolved: `file:${archivePath}`, integrity: archive.integrity, dependencies: packageManifest.dependencies,
+      engines: packageManifest.engines } };
+  await writeFile(join(consumer, 'package-lock.json'), JSON.stringify({ name: consumerManifest.name, version: consumerManifest.version,
+    lockfileVersion: 3, requires: true, packages }));
+  execFileSync('npm', ['ci', '--offline', '--no-audit', '--no-fund'], { cwd: consumer, stdio: 'pipe' });
   const installed = join(consumer, 'node_modules/@accountability/correspondence');
   const manifest = JSON.parse(await readFile(join(installed, 'package.json'), 'utf8'));
   assert.equal(manifest.exports['.'].default, './dist/index.js');
   assert.equal(manifest.exports['./contracts'].default, './dist/contracts.js');
+  assert.equal(manifest.exports['./durable'].default, './dist/durable.js');
   await writeFile(join(consumer, 'smoke.mjs'), `
 import assert from 'node:assert/strict';
 import { createAlphaCorrespondenceFixture, projectMail, createMailboxSyncState, synchronizeMailbox, transitionCorrespondence } from '@accountability/correspondence';
 import { DomainError } from '@accountability/correspondence/contracts';
+import { CorrespondenceRepository } from '@accountability/correspondence/durable';
+import { scoped } from '@accountability/evidence/database';
 assert.match(import.meta.resolve('@accountability/correspondence'), /node_modules\\/.*\\/dist\\/index\\.js$/);
+assert.equal(typeof CorrespondenceRepository, 'function');
+assert.equal(typeof scoped, 'function');
 const fixture = createAlphaCorrespondenceFixture();
 const human = fixture.steps[0].context;
 assert.equal(projectMail(fixture.state, human).total, 1);

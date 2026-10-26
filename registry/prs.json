@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "repository": "neophilism/Correspondence-and-Outreach-Engine",
-  "roadmapVersion": 2,
+  "roadmapVersion": 3,
   "planVerified": true,
-  "plannedPrCount": 2,
+  "plannedPrCount": 3,
   "observedAt": "2026-10-26T18:55:26Z",
   "units": [
     {
@@ -64,9 +64,52 @@
       "implementationStatus": "implemented",
       "evidence": {
         "localChecks": "71 tests plus strict typecheck, compiled ESM package installation smoke, canonical registry and pinned contract verification pass on Node 24.22.1",
-        "ci": "Observe checks for actual PR #2 head; the PR description records the exact source SHA and verified run after completion. Earlier checkpoint CI is not final-head evidence.",
+        "ci": {
+          "commit": "59eaaa33dfea56a7dec6807b336ea86c56706e89",
+          "conclusion": "success",
+          "url": "https://github.com/neophilism/Correspondence-and-Outreach-Engine/actions/runs/40386551519"
+        },
+        "merged": true,
+        "liveAcceptance": "not-performed",
+        "mergeCommit": "f61228d8050775919c170b353f81df8473fc918b"
+      }
+    },
+    {
+      "id": "COE-003",
+      "title": "Durable correspondence aggregate and mailbox synchronization store",
+      "origin": "addition",
+      "prs": [
+        3
+      ],
+      "contributingPrs": [],
+      "dependsOn": [
+        "COE-002"
+      ],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Evidence-Storage-and-Provenance-Engine",
+          "unitId": "ESP-002"
+        }
+      ],
+      "externalPrerequisites": [],
+      "scope": [
+        "Pinned Evidence generic persistence SDK in a separate correspondence database",
+        "Atomic mailbox and sync checkpoint revisions, scope and epoch fences",
+        "Durable command and one-shot handoff adapter",
+        "Actual migration and restricted-login PGlite integration"
+      ],
+      "acceptanceCriteria": "Pinned compiled ESM dependency; PGlite on actual package migration validates scope, takeover/ingress races, CAS, partial rollback, restart and no blind resend. CI and operational acceptance remain separate.",
+      "implementationStatus": "implemented",
+      "evidence": {
+        "localChecks": "85 tests including 14 actual-migration restricted-login PGlite tests, strict typecheck, compiled ESM build, canonical registry, dependency pins and installed-package smoke",
+        "ci": "Final-head CI must be observed on GitHub; PR #3 description records the exact accepted source SHA and run. Earlier WIP runs are not final-head evidence.",
         "merged": false,
         "liveAcceptance": "not-performed"
+      },
+      "dependencyProvenance": {
+        "repository": "neophilism/Evidence-Storage-and-Provenance-Engine",
+        "commit": "dce7105a70b42d77afe4cd48d34723331447037c",
+        "export": "./database"
       }
     }
   ],

@@ -30,7 +30,7 @@ For each page the SDK:
 2. Reads a bounded provider page and the referenced messages using GET only.
 3. Loads again after I/O. It rejects changed authorization or a concurrently advanced sync checkpoint, and applies replies against the current correspondence revision.
 4. Prepares a new aggregate and sync cache, including unverified evidence or explicit quarantine/tombstone dispositions for every page entry.
-5. Calls `store.commit({binding, expectedSyncRevision, expectedCorrespondenceRevision, next})`. The host must compare both revisions and persist **the entire next snapshot in one durable transaction**. Return true only after durability is confirmed. On false or exception no successful checkpoint is returned.
+5. Calls `store.commit({binding, expectedSyncRevision, expectedCorrespondenceRevision, next})`. The host must compare both revisions and persist **the entire next snapshot in one durable transaction**. COE-003 supplies this implementation through `CorrespondenceRepository.openSyncStore`; see [DURABILITY.md](DURABILITY.md). Return true only after durability is confirmed. On false or exception no successful checkpoint is returned.
 
 There is no separate checkpoint-write API. Persisting the cursor separately from ingested evidence violates the store contract. In-memory stores in tests demonstrate the protocol, not production durability. A storage outage can leave earlier pages committed; reloading resumes from those pages. A lost commit acknowledgement is recovered by reloading durable state. Never blindly apply an old `next` snapshot to a new epoch.
 
@@ -83,4 +83,4 @@ Address/MIME parsing is deliberately conservative. Complex address groups, ambig
 
 ## Acceptance evidence
 
-COE-001 is mapped to merged foundation PR #1, with successful CI at its actual final source head `626e12d2c7750a4debc411a83205ea6f6143a677`. COE-002 is the only additional unit and is mapped to PR #2. The PR description records the actual final source SHA and its observed CI run; earlier checkpoints are not substituted for final-head evidence. `pullRequests` remains empty until a complete canonical observation is available. No live account, OAuth, email send, remote attachment fetch or deployment acceptance has been performed.
+COE-001 is mapped to merged foundation PR #1, with successful CI at its actual final source head `626e12d2c7750a4debc411a83205ea6f6143a677`. COE-002 is the merged synchronization unit mapped to PR #2. The subsequent COE-003 persistence adapter is mapped to PR #3. The PR description records the actual final source SHA and its observed CI run; earlier checkpoints are not substituted for final-head evidence. `pullRequests` remains empty until a complete canonical observation is available. No live account, OAuth, email send, remote attachment fetch or deployment acceptance has been performed.
