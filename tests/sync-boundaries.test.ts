@@ -164,3 +164,23 @@ test('changed transport identity between requests cannot consume a page', async 
   await assert.rejects(h.run(), error('sync_transport_failed'));
   assert.equal(h.requests.length, 1); assert.equal(h.commits, 0);
 });
+
+test('provider IDs cannot become URL dot segments', async () => {
+  for (const id of ['.', '..']) {
+    const h = syncHarness();
+    h.add({ emailAddress: h.binding.address, historyId: '100' }); h.add({ messages: [{ id }] });
+    await assert.rejects(h.run(), error('sync_invalid_response'));
+    assert.equal(h.requests.length, 2); assert.equal(h.commits, 0);
+  }
+});
+
+test('a changed sender or sent flag cannot bypass quarantine for existing reply evidence', async () => {
+  const h = syncHarness(); h.gmailFull(); await h.run();
+  const changed = gmailMessage('message-1', 'Changed content.', { labelIds: ['SENT'] });
+  changed.payload.headers.find(header => header.name === 'From')!.value = h.binding.address;
+  h.add({ history: [{ messages: [{ id: 'message-1' }] }], historyId: '200' }); h.add(changed);
+  const result = await h.run();
+  assert.equal(result.quarantined, 1);
+  assert.equal(h.snapshot.sync.quarantine[0]!.reason, 'changed-evidence');
+  assert.equal(h.snapshot.sync.records[0]!.message!.text, 'Please share more details.');
+});

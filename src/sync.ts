@@ -72,7 +72,6 @@ function applyPage(snapshot: MailboxSyncSnapshot, page: SyncPage, ctx: Context, 
     const message = change.message; record.deleted = false; isolate(message.quarantine);
     // Cache provider metadata, including sent/draft records, without fabricating a send acceptance.
     record.message = structuredClone(message);
-    if (message.draft || message.sent || message.from === binding.address || !message.to.includes(binding.address)) continue;
     const existing = correspondence.messages.find(item => item.evidence?.providerKey === key);
     const matchedOutbound = correspondence.messages.find(item => item.direction === 'outbound'
       && item.to === message.from && item.headers.messageId !== null
@@ -92,6 +91,7 @@ function applyPage(snapshot: MailboxSyncSnapshot, page: SyncPage, ctx: Context, 
       }
       continue;
     }
+    if (message.draft || message.sent || message.from === binding.address || !message.to.includes(binding.address)) continue;
     const command = { type: 'ingestReply' as const, inputId: `sync-${digest({ key, fingerprint, actor: ctx.actor.id, purpose: ctx.purpose })}`,
       threadId, createThread: true, provider: binding.provider, accountRef: binding.accountRef, authEpoch: binding.authEpoch,
       providerMessageId: message.providerMessageId, from: message.from, to: binding.address, subject: message.subject,

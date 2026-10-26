@@ -22,7 +22,7 @@ export function historyId(value: unknown): string {
   const id = text(value, 30); invariant(/^[1-9][0-9]*$/.test(id), 'sync_invalid_response', 'Invalid Gmail history ID'); return id;
 }
 export function providerMessageId(value: unknown): string {
-  const id = text(value); invariant(/^[A-Za-z0-9_+=./:@-]+$/.test(id), 'sync_invalid_response', 'Invalid provider message ID'); return id;
+  const id = text(value); invariant(!['.', '..'].includes(id) && /^[A-Za-z0-9_+=./:@-]+$/.test(id), 'sync_invalid_response', 'Invalid provider message ID'); return id;
 }
 export function providerKey(binding: SyncBinding, id: string): string {
   return digest({ provider: binding.provider, accountRef: binding.accountRef, providerMessageId: id });

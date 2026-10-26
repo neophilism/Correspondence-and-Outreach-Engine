@@ -63,7 +63,7 @@
       "acceptanceCriteria": "Official endpoint contracts are documented; fake transport tests verify bounded reads, crash/replay safety, stale-cursor resync, scoped deduplication and content quarantine. No live sends or OAuth provisioning.",
       "implementationStatus": "implemented",
       "evidence": {
-        "localChecks": "69 tests plus strict typecheck, compiled ESM package installation smoke, canonical registry and pinned contract verification pass on Node 24.22.1",
+        "localChecks": "71 tests plus strict typecheck, compiled ESM package installation smoke, canonical registry and pinned contract verification pass on Node 24.22.1",
         "ci": "Observe checks for actual PR #2 head; the PR description records the exact source SHA and verified run after completion. Earlier checkpoint CI is not final-head evidence.",
         "merged": false,
         "liveAcceptance": "not-performed"
