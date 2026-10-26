@@ -363,6 +363,30 @@ test("body and authentication deadlines cancellation malformed content and size 
       ).status,
       status,
     );
+  let emptyReads = 0,
+    emptyCancelled = false;
+  const emptyStream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      emptyReads++;
+      controller.enqueue(new Uint8Array());
+    },
+    cancel() {
+      emptyCancelled = true;
+    },
+  });
+  const empty = request("/operator/command", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-csrf-token": csrf,
+      origin,
+    },
+    body: emptyStream,
+    duplex: "half",
+  } as RequestInit);
+  assert.equal((await handler(empty)).status, 413);
+  assert(emptyCancelled);
+  assert(emptyReads <= 4100);
   let cancelled = false;
   const stream = new ReadableStream<Uint8Array>({
     cancel() {

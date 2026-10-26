@@ -259,9 +259,15 @@ async function body(request: Request, timeoutMs: number): Promise<unknown> {
     invariant(!request.signal.aborted, "request_aborted", "Request cancelled");
     const chunks: Uint8Array[] = [];
     let bytes = 0;
+    let chunkCount = 0;
     for (;;) {
       const result = await Promise.race([reader.read(), deadline]);
       if (result.done) break;
+      invariant(
+        ++chunkCount <= 4096,
+        "body_too_large",
+        "Request exceeds chunk budget",
+      );
       bytes += result.value.byteLength;
       invariant(
         bytes <= 65536,
