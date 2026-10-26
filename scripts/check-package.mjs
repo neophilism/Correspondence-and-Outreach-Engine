@@ -22,11 +22,16 @@ try {
   const manifest = JSON.parse(await readFile(join(installed, 'package.json'), 'utf8'));
   assert.equal(manifest.exports['.'].default, './dist/index.js');
   assert.equal(manifest.exports['./contracts'].default, './dist/contracts.js');
+  assert.equal(manifest.exports['./durable'].default, './dist/durable.js');
   await writeFile(join(consumer, 'smoke.mjs'), `
 import assert from 'node:assert/strict';
 import { createAlphaCorrespondenceFixture, projectMail, createMailboxSyncState, synchronizeMailbox, transitionCorrespondence } from '@accountability/correspondence';
 import { DomainError } from '@accountability/correspondence/contracts';
+import { CorrespondenceRepository } from '@accountability/correspondence/durable';
+import { scoped } from '@accountability/evidence/database';
 assert.match(import.meta.resolve('@accountability/correspondence'), /node_modules\\/.*\\/dist\\/index\\.js$/);
+assert.equal(typeof CorrespondenceRepository, 'function');
+assert.equal(typeof scoped, 'function');
 const fixture = createAlphaCorrespondenceFixture();
 const human = fixture.steps[0].context;
 assert.equal(projectMail(fixture.state, human).total, 1);

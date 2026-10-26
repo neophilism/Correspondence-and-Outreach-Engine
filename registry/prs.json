@@ -78,12 +78,19 @@
       "id": "COE-003",
       "title": "Durable correspondence aggregate and mailbox synchronization store",
       "origin": "addition",
-      "prs": [],
+      "prs": [
+        3
+      ],
       "contributingPrs": [],
       "dependsOn": [
         "COE-002"
       ],
-      "externalDependencies": [],
+      "externalDependencies": [
+        {
+          "repository": "neophilism/Evidence-Storage-and-Provenance-Engine",
+          "unitId": "ESP-002"
+        }
+      ],
       "externalPrerequisites": [],
       "scope": [
         "Pinned Evidence generic persistence SDK in a separate correspondence database",
@@ -94,7 +101,7 @@
       "acceptanceCriteria": "Pinned compiled ESM dependency; PGlite on actual package migration validates scope, takeover/ingress races, CAS, partial rollback, restart and no blind resend. CI and operational acceptance remain separate.",
       "implementationStatus": "in-progress",
       "evidence": {
-        "localChecks": "pending",
+        "localChecks": "14 actual-migration restricted-login PGlite integration tests and strict typecheck pass; full package check pending",
         "ci": "pending",
         "merged": false,
         "liveAcceptance": "not-performed"

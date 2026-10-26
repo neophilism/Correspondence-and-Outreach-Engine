@@ -24,12 +24,15 @@ function validateBinding(binding: SyncBinding): void {
     'sync_invalid_binding', 'Gmail sync is bound to its explicit mailbox address');
   else { text(binding.folderId, 512); invariant(!['.', '..'].includes(binding.folderId!) && !/[?#\\]/.test(binding.folderId!), 'sync_invalid_binding', 'Invalid Graph folder'); }
 }
-export function assertSyncBinding(state: CorrespondenceState, binding: SyncBinding, transport: ReadOnlyMailboxTransport): void {
+export function assertMailboxSyncConnection(state: CorrespondenceState, binding: SyncBinding): void {
   validateBinding(binding); requireScope(binding, state);
   const connection = state.mailbox.connection;
   invariant(state.mailbox.id === binding.mailboxId && connection?.provider === binding.provider
     && connection.accountRef === binding.accountRef && state.mailbox.epochs.auth === binding.authEpoch
     && connection.address === binding.address, 'sync_fenced', 'Mailbox synchronization identity is stale');
+}
+export function assertSyncBinding(state: CorrespondenceState, binding: SyncBinding, transport: ReadOnlyMailboxTransport): void {
+  assertMailboxSyncConnection(state, binding);
   invariant(digest(transport.binding) === digest(binding), 'sync_transport_mismatch', 'Transport belongs to another mailbox identity');
 }
 export function createMailboxSyncState(binding: SyncBinding): MailboxSyncState {

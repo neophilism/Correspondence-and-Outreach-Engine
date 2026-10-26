@@ -29,6 +29,7 @@
     "prepare": "npm run build"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.12",
     "@types/node": "26.6.5",
     "typescript": "7.0.2"
   },
