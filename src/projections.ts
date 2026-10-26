@@ -23,7 +23,7 @@ export function projectMail(state: CorrespondenceState, ctx: Context,
   for (const thread of state.threads) {
     const messages = state.messages.filter(message => message.threadId === thread.id);
     const drafts = state.drafts.filter(draft => draft.threadId === thread.id && (draft.status === 'draft' || draft.status === 'queued'));
-    if (view !== 'all' && view !== 'trash' && view !== 'spam' && ['trash', 'spam'].includes(thread.folder)) continue;
+    if (view !== 'trash' && view !== 'spam' && ['trash', 'spam'].includes(thread.folder)) continue;
     let matches: boolean;
     switch (view) {
       case 'all': matches = true; break;

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "repository": "neophilism/Correspondence-and-Outreach-Engine",
+  "roadmapVersion": 1,
+  "planVerified": true,
+  "plannedPrCount": 1,
+  "observedAt": "2026-10-26T18:55:26Z",
+  "units": [
+    {
+      "id": "COE-001",
+      "title": "Standalone correspondence dependency foundation",
+      "origin": "original",
+      "prs": [
+        1
+      ],
+      "contributingPrs": [],
+      "dependsOn": [],
+      "externalDependencies": [],
+      "externalPrerequisites": [],
+      "scope": [
+        "Draft defaults and mailbox projections",
+        "Human takeover and durable dispatch fencing",
+        "Scoped grants, suppression, cooldown and followup limits",
+        "Unverified reply evidence",
+        "Uncertain outcomes and read-only reconciliation",
+        "Fake provider and Gmail/Graph protocol descriptions",
+        "Standalone strict TypeScript package and Node 24 CI"
+      ],
+      "acceptanceCriteria": "Standalone npm ci and npm run check pass on Node 24; adversarial tests verify each foundation control. CI, merge and live operational acceptance remain separate. No live transport is shipped.",
+      "implementationStatus": "in-progress",
+      "evidence": {
+        "localChecks": "26 tests, strict typecheck, declaration build and registry validation passed on Node 24.22.1",
+        "ci": "pending",
+        "merged": false,
+        "liveAcceptance": "not-performed"
+      }
+    }
+  ],
+  "pullRequests": []
+}

@@ -165,7 +165,7 @@ export function createCorrespondenceState(ctx: Context, input: {
 }): CorrespondenceState {
   const now = validateContext(ctx); role(ctx, 'correspondence:control', 'human');
   identifier(input.mailboxId, 'Mailbox');
-  const brand = input.brand ?? 'Accountability Machine';
+  const brand = input.brand ?? 'Correspondence Engine';
   renderResearchInquiry({ brand, topic: 'Research', questions: ['Which records are available?'] });
   const contextLabel = safeHeader(input.contextLabel ?? 'Research correspondence', 'Research context');
   const limits = { ...DEFAULT_MAILBOX_LIMITS, ...input.limits };

@@ -84,7 +84,7 @@ export function renderResearchInquiry(input: { brand: string; topic: string; que
   });
   return {
     subject: `Research inquiry: ${topic}`,
-    body: `Hello,\n\nThis is an automated research inquiry from ${brand}, using Accountability Machine.\n\nTopic: ${topic}\n\n`
+    body: `Hello,\n\nThis is an automated research inquiry from ${brand}.\n\nTopic: ${topic}\n\n`
       + questions.map((question, i) => `${i + 1}. ${question}`).join('\n')
       + '\n\nParticipation is optional. Please share only information you are authorized to share. To stop further inquiries, reply STOP.',
   };
