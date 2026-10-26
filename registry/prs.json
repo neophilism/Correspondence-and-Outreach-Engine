@@ -44,7 +44,9 @@
       "id": "COE-002",
       "title": "Read-only provider mailbox synchronization and reply ingestion SDK",
       "origin": "addition",
-      "prs": [],
+      "prs": [
+        2
+      ],
       "contributingPrs": [],
       "dependsOn": [
         "COE-001"

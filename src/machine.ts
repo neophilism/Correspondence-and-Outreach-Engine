@@ -371,8 +371,15 @@ export function transitionCorrespondence(original: CorrespondenceState, ctx: Con
       const connection = state.mailbox.connection;
       invariant(connection && command.authEpoch === state.mailbox.epochs.auth && command.accountRef === connection.accountRef
         && command.provider === connection.provider, 'ingress_fenced', 'Reply ingress uses a stale or foreign connection');
-      const thread = find(state.threads, command.threadId, 'Thread');
       const from = normalizeAddress(command.from); const to = normalizeAddress(command.to);
+      let thread = state.threads.find(item => item.id === command.threadId);
+      if (!thread && command.createThread === true) {
+        unique(state.threads, command.threadId);
+        thread = { id: command.threadId, recipient: from, subject: safeHeader(command.subject, 'Subject'),
+          folder: 'inbox', read: false, starred: false, contextEpoch: 0, autonomyPaused: true, createdAt: now, lastActivityAt: now };
+        state.threads.push(thread);
+      }
+      invariant(thread, 'not_found', 'Thread was not found');
       invariant(to === connection.address, 'recipient_mismatch', 'Reply does not target this mailbox');
       const subject = safeHeader(command.subject, 'Subject'); const body = safeBody(command.body);
       const headers = validateMessageHeaders(command.headers); const providerMessageId = providerIdentifier(command.providerMessageId);
