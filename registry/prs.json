@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "repository": "neophilism/Correspondence-and-Outreach-Engine",
-  "roadmapVersion": 3,
+  "roadmapVersion": 4,
   "planVerified": true,
-  "plannedPrCount": 3,
-  "observedAt": "2026-10-26T18:55:26Z",
+  "plannedPrCount": 4,
+  "observedAt": "2026-10-26T20:56:12Z",
   "units": [
     {
       "id": "COE-001",
@@ -103,13 +103,42 @@
       "evidence": {
         "localChecks": "85 tests including 14 actual-migration restricted-login PGlite tests, strict typecheck, compiled ESM build, canonical registry, dependency pins and installed-package smoke",
         "ci": "Final-head CI must be observed on GitHub; PR #3 description records the exact accepted source SHA and run. Earlier WIP runs are not final-head evidence.",
-        "merged": false,
-        "liveAcceptance": "not-performed"
+        "merged": true,
+        "liveAcceptance": "not-performed",
+        "mergeCommit": "60a28b56004a59d450861609fe4345c53a3e03d4"
       },
       "dependencyProvenance": {
         "repository": "neophilism/Evidence-Storage-and-Provenance-Engine",
         "commit": "dce7105a70b42d77afe4cd48d34723331447037c",
         "export": "./database"
+      }
+    },
+    {
+      "id": "COE-004",
+      "title": "Private human operator HTTP gateway",
+      "origin": "addition",
+      "prs": [
+        4
+      ],
+      "contributingPrs": [],
+      "dependsOn": [
+        "COE-003"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": [],
+      "scope": [
+        "Fixed-scope authenticated operator read/draft APIs",
+        "Session-bound CSRF, origin checks, bounded JSON bodies and redacted failures",
+        "Human takeover with committed-handoff semantics",
+        "Restricted-login persistence integration and compiled package acceptance"
+      ],
+      "acceptanceCriteria": "Meaningful real-migration tests verify draft edits, scope/session/CSRF denial, strict no-effect command whitelist, deadlines, takeover ordering, lost acknowledgement replay and installed compiled ESM. CI and host/live acceptance remain separate.",
+      "implementationStatus": "implemented",
+      "evidence": {
+        "localChecks": "92 tests including 7 operator admission/persistence tests, strict typecheck, compiled ESM build, canonical registry and pinned contracts/dependency verification plus installed-package smoke. Full local check passed; current-head CI remains pending.",
+        "ci": "Pending final-head observation",
+        "merged": false,
+        "liveAcceptance": "not-performed"
       }
     }
   ],
