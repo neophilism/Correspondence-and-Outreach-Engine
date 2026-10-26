@@ -83,7 +83,13 @@ function applyPage(snapshot: MailboxSyncSnapshot, page: SyncPage, ctx: Context, 
       body: message.text, headers: message.headers });
     if (existing) {
       record.ingestedMessageId = existing.id;
-      if (existing.evidence?.ingressFingerprint !== fingerprint) isolate([changedEvidence(change.id)]);
+      if (existing.evidence?.ingressFingerprint !== fingerprint) {
+        const isolated = changedEvidence(change.id, { from: message.from, to: message.to, subject: message.subject,
+          text: message.text, headers: message.headers });
+        isolate([isolated]);
+        record.message = { ...message, from: existing.from, subject: existing.subject, text: existing.body,
+          headers: structuredClone(existing.headers), quarantine: [...message.quarantine, isolated] };
+      }
       continue;
     }
     const command = { type: 'ingestReply' as const, inputId: `sync-${digest({ key, fingerprint, actor: ctx.actor.id, purpose: ctx.purpose })}`,
@@ -102,7 +108,12 @@ function applyPage(snapshot: MailboxSyncSnapshot, page: SyncPage, ctx: Context, 
 /** Each page is ingested and checkpointed in one host-provided durable compare-and-swap transaction. */
 export async function synchronizeMailbox(input: SyncInvocation): Promise<MailboxSyncResult> {
   const { context, store } = input; const binding = structuredClone(input.binding); const limits = syncLimits(input.limits);
-  const transport = input.transport;
+  const transport: ReadOnlyMailboxTransport = { binding, read(request) {
+    invariant(digest(input.transport.binding) === digest(binding), 'sync_transport_mismatch', 'Transport identity changed during synchronization');
+    return input.transport.read(request);
+  } };
+  // Validate the actual configured transport before wrapping it for repeated per-request checks.
+  invariant(digest(input.transport.binding) === digest(binding), 'sync_transport_mismatch', 'Transport belongs to another mailbox identity');
   const result: MailboxSyncResult = { pagesCommitted: 0, ingested: 0, quarantined: 0, resyncs: 0, more: false };
   for (let pageNumber = 0; pageNumber < limits.maxPages; pageNumber++) {
     const snapshot = await load(store, binding); assertSnapshot(snapshot, binding, transport); authorize(context, snapshot.correspondence);

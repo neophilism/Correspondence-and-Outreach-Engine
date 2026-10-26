@@ -33,7 +33,9 @@ function quarantine(id: string, reason: QuarantinedContent['reason'], mediaType:
     byteLength: size, sha256, contentBase64: bytes && bytes.byteLength <= 65_536 ? Buffer.from(bytes).toString('base64') : null };
 }
 export function invalidMessage(id: string): QuarantinedContent { return quarantine(id, 'invalid-message', 'application/octet-stream', null); }
-export function changedEvidence(id: string): QuarantinedContent { return quarantine(id, 'changed-evidence', 'text/plain', null); }
+export function changedEvidence(id: string, value: unknown): QuarantinedContent {
+  return quarantine(id, 'changed-evidence', 'application/json', Buffer.from(JSON.stringify(value)));
+}
 function bareAddress(value: unknown): string {
   const raw = text(value, 320).trim();
   // Display names are data; only one unambiguous address is accepted.

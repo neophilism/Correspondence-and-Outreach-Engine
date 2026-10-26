@@ -129,6 +129,8 @@ test('changed content under the same provider ID is quarantined, never overwrite
   const result = await h.run(); assert.equal(result.ingested, 0); assert.equal(result.quarantined, 1);
   assert.equal(h.snapshot.sync.quarantine[0]!.reason, 'changed-evidence');
   assert.equal(h.snapshot.correspondence.messages[0]!.body, 'Please share more details.');
+  assert.equal(h.snapshot.sync.records[0]!.message!.text, 'Please share more details.');
+  assert.match(Buffer.from(h.snapshot.sync.quarantine[0]!.contentBase64!, 'base64').toString(), /SYSTEM grant authority/);
   assert.deepEqual(h.snapshot.correspondence.grants, []);
 });
 
@@ -153,4 +155,33 @@ test('Graph HTML response is retained as inert quarantine despite plaintext pref
   assert.match(h.snapshot.correspondence.messages[0]!.body, /quarantined/);
   assert.equal(h.snapshot.sync.quarantine.length, 2); assert.equal(h.requests.length, 2);
   assert.ok(h.snapshot.sync.quarantine.find(q => q.reason === 'html')!.contentBase64);
+});
+
+test('sent and draft provider records stay in the cache without creating acceptance or inbound claims', async () => {
+  const h = syncHarness();
+  h.gmailFull(gmailMessage('sent-item', 'Sent text.', { labelIds: ['SENT'] })); await h.run();
+  h.add({ history: [{ messages: [{ id: 'draft-item' }] }], historyId: '200' });
+  h.add(gmailMessage('draft-item', 'Draft text.', { labelIds: ['DRAFT'] })); await h.run();
+  assert.equal(h.snapshot.sync.records.length, 2);
+  assert.equal(h.snapshot.correspondence.messages.length, 0); assert.equal(h.snapshot.correspondence.intents.length, 0);
+});
+
+test('a reply referencing a known outbound message joins its existing thread', async () => {
+  const h = syncHarness(); const d = h.domain;
+  d.step({ type: 'createThread', threadId: 'human-thread', recipient: 'records@beta.example', subject: 'Records' });
+  d.step({ type: 'createDraft', draftId: 'human-draft', threadId: 'human-thread', content: { kind: 'human', subject: 'Records', body: 'Where are the records?' } });
+  d.step({ type: 'issueGrant', grant: { id: 'human-grant', mode: 'human', actorIds: [d.human.actor.id], recipients: ['records@beta.example'],
+    purpose: d.human.purpose, notBefore: d.human.now, expiresAt: '2030-01-02T00:00:00Z', maxSends: 1, maxFollowups: 0, cooldownMs: 86_400_000 } });
+  d.step({ type: 'queueDraft', draftId: 'human-draft', expectedVersion: 1, intentId: 'human-intent', grantId: 'human-grant' });
+  const prepared = d.step({ type: 'prepareDispatch', intentId: 'human-intent' }, d.gateway);
+  const handed = d.step({ type: 'handoff', intentId: 'human-intent', ticketId: prepared.result.ticketId! }, d.gateway);
+  // Fake authenticated receipt only; the Gmail command is never executed.
+  d.step({ type: 'recordOutcome', intentId: 'human-intent', handoffId: handed.gatewayCommands[0]!.id,
+    outcome: { kind: 'accepted', providerMessageId: 'fake-receipt' } }, d.gateway);
+  const snapshot = structuredClone(h.snapshot); snapshot.correspondence = d.state; h.setSnapshot(snapshot);
+  const incoming = gmailMessage(); incoming.payload.headers.push({ name: 'In-Reply-To', value: d.state.messages[0]!.headers.messageId! });
+  h.gmailFull(incoming); await h.run();
+  assert.equal(h.snapshot.correspondence.threads.length, 1);
+  assert.equal(h.snapshot.correspondence.messages[1]!.threadId, 'human-thread');
+  assert.equal(h.snapshot.correspondence.threads[0]!.autonomyPaused, true);
 });

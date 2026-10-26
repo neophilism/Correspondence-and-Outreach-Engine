@@ -43,6 +43,7 @@ async function fetchMessages(binding: SyncBinding, ids: string[], transport: Rea
     } catch { changes.push({ id, message: null, invalid: true }); }
     invariant(Buffer.byteLength(JSON.stringify(changes)) <= limits.maxBatchBytes, 'sync_batch_limit', 'Normalized page exceeds its byte bound');
   }
+  invariant(Buffer.byteLength(JSON.stringify(changes)) <= limits.maxBatchBytes, 'sync_batch_limit', 'Normalized page exceeds its byte bound');
   return changes;
 }
 export async function readSyncPage(binding: SyncBinding, state: MailboxSyncState, transport: ReadOnlyMailboxTransport, limits: MailboxSyncLimits): Promise<SyncPage> {

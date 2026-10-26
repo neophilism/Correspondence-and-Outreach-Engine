@@ -56,15 +56,17 @@ export async function readBoundedJson(transport: ReadOnlyMailboxTransport, reque
       catch { throw new DomainError('sync_transport_failed', 'Mailbox read transport failed'); }
       invariant(Number.isInteger(response.status) && response.status >= 100 && response.status <= 599,
         'sync_invalid_response', 'Invalid provider status');
-      const chunks: Uint8Array[] = []; let size = 0; let invalid = false; let oversized = false;
+      const chunks: Uint8Array[] = []; let size = 0; let invalid = false; let oversized = false; let chunkCount = 0; let fragmented = false;
       try {
         for await (const chunk of response.body) {
+          if (++chunkCount > 4096) { fragmented = true; break; }
           if (!(chunk instanceof Uint8Array)) { invalid = true; break; }
           size += chunk.byteLength;
           if (size > request.maxResponseBytes) { oversized = true; break; }
           chunks.push(Uint8Array.from(chunk));
         }
       } catch { throw new DomainError('sync_transport_failed', 'Mailbox read body failed'); }
+      invariant(!fragmented, 'sync_response_too_fragmented', 'Mailbox response exceeds its chunk bound');
       invariant(!invalid, 'sync_invalid_response', 'Mailbox response must contain bytes');
       invariant(!oversized, 'sync_response_too_large', 'Mailbox response exceeds the configured limit');
       // Never retain or propagate provider error bodies, headers, locations or exception messages.
