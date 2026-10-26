@@ -36,14 +36,19 @@ try {
   assert.equal(manifest.exports['.'].default, './dist/index.js');
   assert.equal(manifest.exports['./contracts'].default, './dist/contracts.js');
   assert.equal(manifest.exports['./durable'].default, './dist/durable.js');
+  assert.equal(manifest.exports['./operator'].default, './dist/operator.js');
   await writeFile(join(consumer, 'smoke.mjs'), `
 import assert from 'node:assert/strict';
 import { createAlphaCorrespondenceFixture, projectMail, createMailboxSyncState, synchronizeMailbox, transitionCorrespondence } from '@accountability/correspondence';
 import { DomainError } from '@accountability/correspondence/contracts';
 import { CorrespondenceRepository } from '@accountability/correspondence/durable';
+import { createOperatorHandler } from '@accountability/correspondence/operator';
 import { scoped } from '@accountability/evidence/database';
 assert.match(import.meta.resolve('@accountability/correspondence'), /node_modules\\/.*\\/dist\\/index\\.js$/);
 assert.equal(typeof CorrespondenceRepository, 'function');
+assert.equal(typeof createOperatorHandler, 'function');
+const privateOperator = createOperatorHandler({load:async()=>{throw Error('must not load');},execute:async()=>{throw Error('must not execute');}},{authenticate:async()=>null},{tenantId:'example',projectId:'research',mailboxId:'mailbox',origin:'https://workspace.example'});
+assert.equal((await privateOperator(new Request('https://workspace.example/operator/mail'))).status,401);
 assert.equal(typeof scoped, 'function');
 const fixture = createAlphaCorrespondenceFixture();
 const human = fixture.steps[0].context;

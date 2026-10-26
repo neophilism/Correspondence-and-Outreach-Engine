@@ -47,3 +47,7 @@ The SDK in `sync.ts` uses a read-only injected transport and a transactional sto
 ## Durable adapter
 
 [COE-003 persistence contract](DURABILITY.md) describes the generic KV wrapper, storage/domain/checkpoint revisions, generation fences, replay-validated ingress and durable one-shot consumption. It imports only the pinned SDK public database export and requires a dedicated correspondence database. PGlite uses the installed actual migration and restricted embedded session; this is not evidence of multi-session network database acceptance.
+
+## Private human operator adapter
+
+COE-004 adds the optional [private operator gateway](OPERATOR.md) over the existing durable repository. It requires an authenticated host session and scoped CSRF binding, limits exposed commands to private drafts/flags/restriction/cancellation/human takeover, and never returns gateway commands. Live auth/hosting and Visual command UI integration remain separate.

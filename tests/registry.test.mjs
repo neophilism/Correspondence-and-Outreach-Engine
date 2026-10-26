@@ -8,7 +8,7 @@ const registry = JSON.parse(body);
 
 test('canonical registry records the approved dependency units mapped to actual PR without fabricated observations', () => {
   const parsed = parsePrRegistry(body, registry.repository);
-  assert.equal(parsed.items.length, 3);
+  assert.equal(parsed.items.length, 4);
   assert.equal(parsed.items[0].sourceItemId, 'COE-001');
   assert.deepEqual(parsed.items[0].numbers, [1]);
   assert.equal(parsed.items[1].sourceItemId, 'COE-002');
@@ -17,6 +17,9 @@ test('canonical registry records the approved dependency units mapped to actual 
   assert.equal(parsed.items[2].sourceItemId, 'COE-003');
   assert.deepEqual(parsed.items[2].numbers, [3]);
   assert.deepEqual(parsed.items[2].dependsOn, ['COE-002']);
+  assert.equal(parsed.items[3].sourceItemId, 'COE-004');
+  assert.deepEqual(parsed.items[3].numbers, [4]);
+  assert.deepEqual(parsed.items[3].dependsOn, ['COE-003']);
   assert.deepEqual(parsed.pullRequests, []);
 });
 
