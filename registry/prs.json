@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "repository": "neophilism/Correspondence-and-Outreach-Engine",
-  "roadmapVersion": 1,
+  "roadmapVersion": 2,
   "planVerified": true,
-  "plannedPrCount": 1,
+  "plannedPrCount": 2,
   "observedAt": "2026-10-26T18:55:26Z",
   "units": [
     {
@@ -31,11 +31,40 @@
       "evidence": {
         "localChecks": "30 tests, strict typecheck, declaration build, canonical registry validation, pinned contract hash and installed compiled ESM package smoke passed on Node 24.22.1",
         "ci": {
-          "commit": "9af10f790c3f02e08a924a719cd07d796171bfb8",
+          "commit": "626e12d2c7750a4debc411a83205ea6f6143a677",
           "conclusion": "success",
-          "url": "https://github.com/neophilism/Correspondence-and-Outreach-Engine/actions/runs/40382958893",
-          "scope": "Prior package checkpoint: 26 tests and package build. Later package-smoke additions require a fresh CI run."
+          "url": "https://github.com/neophilism/Correspondence-and-Outreach-Engine/actions/runs/40383382182",
+          "scope": "Final foundation head, 30 tests and installed compiled ESM verification"
         },
+        "merged": true,
+        "liveAcceptance": "not-performed",
+        "mergeCommit": "a51a5f1a59b90c9eb9c99e65214f87c76816caf2"
+      }
+    },
+    {
+      "id": "COE-002",
+      "title": "Read-only provider mailbox synchronization and reply ingestion SDK",
+      "origin": "addition",
+      "prs": [
+        2
+      ],
+      "contributingPrs": [],
+      "dependsOn": [
+        "COE-001"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": [],
+      "scope": [
+        "Gmail full/history and Graph folder delta synchronization",
+        "Injectable read-only transport with external credentials",
+        "Bounded parsing, account and epoch fences, atomic ingestion/checkpoint",
+        "Unverified reply evidence and content quarantine"
+      ],
+      "acceptanceCriteria": "Official endpoint contracts are documented; fake transport tests verify bounded reads, crash/replay safety, stale-cursor resync, scoped deduplication and content quarantine. No live sends or OAuth provisioning.",
+      "implementationStatus": "implemented",
+      "evidence": {
+        "localChecks": "71 tests plus strict typecheck, compiled ESM package installation smoke, canonical registry and pinned contract verification pass on Node 24.22.1",
+        "ci": "Observe checks for actual PR #2 head; the PR description records the exact source SHA and verified run after completion. Earlier checkpoint CI is not final-head evidence.",
         "merged": false,
         "liveAcceptance": "not-performed"
       }

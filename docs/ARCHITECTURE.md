@@ -1,4 +1,4 @@
-# Correspondence dependency foundation — COE-001
+# Correspondence dependency engine — COE-001 / COE-002
 
 The engine is a pure aggregate transition library. A single mailbox owns scoped threads, drafts, grants, suppressions, intents, receipts and events. Transitions clone input state and return a new revision, a result and optional gateway commands. Errors leave input state unchanged. Context and stored state are trusted host inputs; untrusted mail bodies never become actors, roles, commands or policy. This foundation supplies no authentication server, durable database or external gateway.
 
@@ -30,12 +30,16 @@ Authenticated provider ingress binds provider, account and authorization epoch. 
 
 `applyFakeProvider` is the only execution simulator. It has no network or credential access, including accept-then-timeout behavior. Its remembered receipts let tests distinguish provider acceptance from a timeout without resending.
 
-Gmail and Graph functions return protocol descriptions and accept fake response fixtures. They never call fetch, OAuth, SMTP or provider SDKs. A credential handle is an opaque external reference, never a secret. Gmail reconciliation requires a fetched SENT record with exact Message-ID and handoff header; search hits alone are insufficient. Graph matches the handoff header and a lower timestamp bound on authenticated sent-items records. Multiple matches remain unknown. The Graph JSON description does not preserve arbitrary threading headers or provide full pagination; neither provider adapter is certified for live operation. The host must authenticate records for the indicated account, fetch complete evidence, and handle pagination without converting absence into a retry.
+Outbound Gmail and Graph functions in `adapters.ts` return protocol descriptions and accept fake response fixtures. The read-only synchronization SDK is specified separately in [SYNC.md](SYNC.md). They never call fetch, OAuth, SMTP or provider SDKs. A credential handle is an opaque external reference, never a secret. Gmail reconciliation requires a fetched SENT record with exact Message-ID and handoff header; search hits alone are insufficient. Graph matches the handoff header and a lower timestamp bound on authenticated sent-items records. Multiple matches remain unknown. The Graph JSON description does not preserve arbitrary threading headers or provide full pagination; neither provider adapter is certified for live operation. The host must authenticate records for the indicated account, fetch complete evidence, and handle pagination without converting absence into a retry.
 
 There is no live-provider enablement switch or deployed gateway in this package. Adding real transport, credentials, persistence or operational acceptance is separate work. This foundation contains no deployment data, downstream orchestrator or actual outreach.
 
 ## Verification and registry
 
-`registry/prs.json` is the single canonical plan, using Identity's shared `pr-contract.mjs` format. COE-001 is the one authorized foundation unit mapped to real PR #1. A mapped PR, an implementation, passing local tests, CI success, merge and operational acceptance are distinct. `registry/roadmap.json` is retired, with no second unit list.
+`registry/prs.json` is the single canonical plan, using Identity's shared `pr-contract.mjs` format. COE-001 is the merged foundation mapped to real PR #1. COE-002 is the second bounded SDK unit mapped to real PR #2, depending on COE-001. A mapped PR, an implementation, passing local tests, CI success, merge and operational acceptance are distinct. `registry/roadmap.json` is retired, with no second unit list.
 
 `npm run check` validates strict source/tests, fake integration, authorization failures, takeover race orderings, stale tickets, optouts, grant limits, reply evidence, no-retry uncertainty, protocol encodings, registry structure and the pinned contract hash. CI runs the same command on Node 24 from `npm ci`. No live provider or deployment acceptance has been performed.
+
+## Provider mailbox synchronization
+
+The SDK in `sync.ts` uses a read-only injected transport and a transactional store interface. It atomically persists each normalized provider page, unverified reply ingestion and cursor with both mailbox and sync revision comparisons. Official endpoint sources, limits, epoch and account fences, stale-cursor recovery and quarantine behavior are documented in [SYNC.md](SYNC.md). Provider metadata updates never authorize outbound sends.

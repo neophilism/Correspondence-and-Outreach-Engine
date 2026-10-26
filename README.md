@@ -1,13 +1,13 @@
 # Correspondence and Outreach Engine
 
-Standalone Node 24 / strict TypeScript dependency engine for drafts, ordinary mailbox views, human takeover, bounded send grants and unverified reply evidence. There is no live provider transport. The provider simulator performs no I/O; Gmail and Graph adapters return protocol descriptions only. Credentials remain external.
+Standalone Node 24 / strict TypeScript dependency engine for drafts, ordinary mailbox views, human takeover, bounded send grants and unverified reply evidence. Outbound execution remains fake-only. The read-only mailbox synchronization SDK uses an injected Gmail/Graph HTTP transport whose credentials stay private to that transport. No built-in network client or OAuth provisioning is provided.
 
 ```sh
 npm ci
 npm run check
 ```
 
-`check` runs strict typechecking, adversarial domain tests, the declaration/JavaScript build, canonical PR registry validation and pinned contract verification. No monorepo files, database, network services or provider accounts are needed at runtime or during tests. Installing dev dependencies uses the lockfile. Node 24 is required for native TypeScript test execution; package consumers load compiled JavaScript from `dist`.
+`check` runs strict typechecking, adversarial domain tests, the declaration/JavaScript build, canonical PR registry validation and pinned contract verification. The domain library and tests need no monorepo files, database, network service or provider account. Read-only synchronization uses caller-provided transport and transactional store interfaces. Installing dev dependencies uses the lockfile. Node 24 is required for native TypeScript test execution; package consumers load compiled JavaScript from `dist`.
 
 ```ts
 import { createCorrespondenceState, transitionCorrespondence, projectMail } from '@accountability/correspondence';
@@ -40,4 +40,6 @@ Mailbox projections provide inbox, archive, sent, drafts, unread, starred, trash
 
 Consumers must authenticate contexts, persist state with atomic revision comparison, and release a handoff command once only after commit. A committed handoff is the point after which takeover reports an unrecallable send. Unknown external outcomes block repeat sends to that recipient and permit read-only reconciliation. Provider acceptance is not proof of delivery.
 
-See [architecture](docs/ARCHITECTURE.md), [source provenance](docs/PROVENANCE.md), and the [canonical work registry](registry/prs.json). Contracts are vendored byte-identical from Identity commit `2ecac5a7ec01e4470774ef545060b99dba38014d`. The foundation is tracked in [PR #1](https://github.com/neophilism/Correspondence-and-Outreach-Engine/pull/1). Local checks, CI, merge and live acceptance are separate evidence.
+For provider synchronization and reply ingestion, see the [SDK contract and official endpoint sources](docs/SYNC.md). `synchronizeMailbox` bounds pages and messages, fences scope/account/auth epochs, quarantines HTML/attachments and commits each page with its ingested evidence and cursor atomically through the host store. No live provider calls were made during development.
+
+See [architecture](docs/ARCHITECTURE.md), [source provenance](docs/PROVENANCE.md), and the [canonical work registry](registry/prs.json). Contracts are vendored byte-identical from Identity commit `2ecac5a7ec01e4470774ef545060b99dba38014d`. The merged foundation is tracked in [PR #1](https://github.com/neophilism/Correspondence-and-Outreach-Engine/pull/1). The SDK is tracked in [PR #2](https://github.com/neophilism/Correspondence-and-Outreach-Engine/pull/2). Local checks, CI, merge and live acceptance are separate evidence.

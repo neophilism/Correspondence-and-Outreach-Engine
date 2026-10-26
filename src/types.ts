@@ -118,7 +118,7 @@ export type CorrespondenceCommand = { inputId: string } & (
   | { type: 'markUncertain'; intentId: string; handoffId: string; reason: 'timeout' | 'crash' | 'transport' }
   | { type: 'recordOutcome'; intentId: string; handoffId: string; outcome: ProviderOutcome }
   | { type: 'requestReconciliation'; intentId: string }
-  | { type: 'ingestReply'; threadId: string; provider: Provider; accountRef: string; authEpoch: number;
+  | { type: 'ingestReply'; threadId: string; createThread?: boolean; provider: Provider; accountRef: string; authEpoch: number;
       providerMessageId: string; from: string; to: string; subject: string; body: string; headers: MessageHeaders }
   | { type: 'setThreadFlags'; threadId: string; folder?: MailFolder; read?: boolean; starred?: boolean }
   | { type: 'resumeThread'; threadId: string }
