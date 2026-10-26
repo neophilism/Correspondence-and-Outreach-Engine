@@ -11,6 +11,10 @@
     "./contracts": {
       "types": "./dist/contracts.d.ts",
       "default": "./dist/contracts.js"
+    },
+    "./durable": {
+      "types": "./dist/durable.d.ts",
+      "default": "./dist/durable.js"
     }
   },
   "engines": {
@@ -32,5 +36,8 @@
     "dist",
     "README.md",
     "docs"
-  ]
+  ],
+  "dependencies": {
+    "@accountability/evidence": "git+https://github.com/neophilism/Evidence-Storage-and-Provenance-Engine.git#dce7105a70b42d77afe4cd48d34723331447037c"
+  }
 }
