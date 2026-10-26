@@ -6,3 +6,5 @@ export { encodeRfc5322, gmailProtocolRequest, graphProtocolRequest, parseProvide
   reconcileProviderRecords, createFakeProviderState, applyFakeProvider } from './adapters.ts';
 export type { ProtocolRequest, FakeProviderBehavior, FakeProviderState } from './adapters.ts';
 export { createAlphaCorrespondenceFixture } from './fixture.ts';
+export { assertSyncBinding, readBoundedJson } from './sync.ts';
+export type { SyncBinding, ReadRequest, ReadResponse, ReadOnlyMailboxTransport, SyncCursor, SyncCheckpoint } from './sync.ts';

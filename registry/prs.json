@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "repository": "neophilism/Correspondence-and-Outreach-Engine",
-  "roadmapVersion": 1,
+  "roadmapVersion": 2,
   "planVerified": true,
-  "plannedPrCount": 1,
+  "plannedPrCount": 2,
   "observedAt": "2026-10-26T18:55:26Z",
   "units": [
     {
@@ -31,11 +31,37 @@
       "evidence": {
         "localChecks": "30 tests, strict typecheck, declaration build, canonical registry validation, pinned contract hash and installed compiled ESM package smoke passed on Node 24.22.1",
         "ci": {
-          "commit": "9af10f790c3f02e08a924a719cd07d796171bfb8",
+          "commit": "626e12d2c7750a4debc411a83205ea6f6143a677",
           "conclusion": "success",
-          "url": "https://github.com/neophilism/Correspondence-and-Outreach-Engine/actions/runs/40382958893",
-          "scope": "Prior package checkpoint: 26 tests and package build. Later package-smoke additions require a fresh CI run."
+          "url": "https://github.com/neophilism/Correspondence-and-Outreach-Engine/actions/runs/40383382182",
+          "scope": "Final foundation head, 30 tests and installed compiled ESM verification"
         },
+        "merged": false,
+        "liveAcceptance": "not-performed"
+      }
+    },
+    {
+      "id": "COE-002",
+      "title": "Read-only provider mailbox synchronization and reply ingestion SDK",
+      "origin": "addition",
+      "prs": [],
+      "contributingPrs": [],
+      "dependsOn": [
+        "COE-001"
+      ],
+      "externalDependencies": [],
+      "externalPrerequisites": [],
+      "scope": [
+        "Gmail full/history and Graph folder delta synchronization",
+        "Injectable read-only transport with external credentials",
+        "Bounded parsing, account and epoch fences, atomic ingestion/checkpoint",
+        "Unverified reply evidence and content quarantine"
+      ],
+      "acceptanceCriteria": "Official endpoint contracts are documented; fake transport tests verify bounded reads, crash/replay safety, stale-cursor resync, scoped deduplication and content quarantine. No live sends or OAuth provisioning.",
+      "implementationStatus": "in-progress",
+      "evidence": {
+        "localChecks": "pending",
+        "ci": "pending",
         "merged": false,
         "liveAcceptance": "not-performed"
       }
