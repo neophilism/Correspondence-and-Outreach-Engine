@@ -15,6 +15,10 @@
     "./durable": {
       "types": "./dist/durable.d.ts",
       "default": "./dist/durable.js"
+    },
+    "./operator": {
+      "types": "./dist/operator.d.ts",
+      "default": "./dist/operator.js"
     }
   },
   "engines": {
