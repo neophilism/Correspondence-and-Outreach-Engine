@@ -51,11 +51,13 @@ test('real record insert failure rolls back checkpoint, aggregate, head and audi
   const rig = await setup(t); await initialize(rig.repo); const state = await connect(rig.repo); const target = binding(state);
   const store = await rig.repo.openSyncStore(gateway, target); const before = await store.load(target);
   const audits = await scoped(rig.db, human, tx => tx.audits());
+  const storedBefore = (await scoped(rig.db, human, tx => tx.list('correspondence-mailbox-v1')))[0]!;
   rig.fault.afterRecord = true;
   await assert.rejects(synchronizeMailbox({ context: gateway, binding: target, store, transport: incomingTransport(target).transport, limits: { maxPages: 1 } }), code('sync_commit_failed'));
   rig.fault.afterRecord = false;
   assert.deepEqual(await store.load(target), before);
   assert.deepEqual(await scoped(rig.db, human, tx => tx.audits()), audits);
+  assert.equal(await scoped(rig.db, human, tx => tx.get(storedBefore.kind, storedBefore.id, storedBefore.revision + 1)), null);
   assert.equal((await synchronizeMailbox({ context: gateway, binding: target, store, transport: incomingTransport(target).transport, limits: { maxPages: 1 } })).ingested, 1);
 });
 
@@ -130,6 +132,8 @@ test('takeover committed before handoff fences durable dispatch; rollback cannot
 
 test('one-shot handoff consumption commits uncertainty before effects and rejects replay and stale handles', async t => {
   const rig = await setup(t); const ready = await prepared(rig.repo, 'handed-off'); assert.ok(ready.send);
+  const handoffReplay = await rig.repo.execute(gateway, 'mailbox', ready.state.revision - 1, ready.handoff);
+  assert.equal(handoffReplay.duplicate, true); assert.deepEqual(handoffReplay.gatewayCommands, []);
   const consumed = await rig.repo.consumeHandoff(gateway, 'mailbox', ready.send);
   assert.equal((await rig.repo.load(gateway, 'mailbox')).intents[0]!.status, 'uncertain');
   await assert.rejects(rig.repo.consumeHandoff(gateway, 'mailbox', ready.send), code('handoff_consumed'));

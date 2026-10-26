@@ -99,10 +99,10 @@
         "Actual migration and restricted-login PGlite integration"
       ],
       "acceptanceCriteria": "Pinned compiled ESM dependency; PGlite on actual package migration validates scope, takeover/ingress races, CAS, partial rollback, restart and no blind resend. CI and operational acceptance remain separate.",
-      "implementationStatus": "in-progress",
+      "implementationStatus": "implemented",
       "evidence": {
-        "localChecks": "14 actual-migration restricted-login PGlite integration tests and strict typecheck pass; full package check pending",
-        "ci": "pending",
+        "localChecks": "85 tests including 14 actual-migration restricted-login PGlite tests, strict typecheck, compiled ESM build, canonical registry, dependency pins and installed-package smoke",
+        "ci": "Final-head CI must be observed on GitHub; PR #3 description records the exact accepted source SHA and run. Earlier WIP runs are not final-head evidence.",
         "merged": false,
         "liveAcceptance": "not-performed"
       },

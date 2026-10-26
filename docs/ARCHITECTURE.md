@@ -1,6 +1,6 @@
-# Correspondence dependency engine — COE-001 / COE-002
+# Correspondence dependency engine — COE-001 / COE-002 / COE-003
 
-The engine is a pure aggregate transition library. A single mailbox owns scoped threads, drafts, grants, suppressions, intents, receipts and events. Transitions clone input state and return a new revision, a result and optional gateway commands. Errors leave input state unchanged. Context and stored state are trusted host inputs; untrusted mail bodies never become actors, roles, commands or policy. This foundation supplies no authentication server, durable database or external gateway.
+The engine is a pure aggregate transition library. A single mailbox owns scoped threads, drafts, grants, suppressions, intents, receipts and events. Transitions clone input state and return a new revision, a result and optional gateway commands. Errors leave input state unchanged. Context and stored state are trusted host inputs; untrusted mail bodies never become actors, roles, commands or policy. The pure domain layer supplies no authentication server or external gateway. COE-003 adds the optional durable adapter using a pinned generic persistence SDK in a dedicated correspondence database.
 
 ## Authority and defaults
 
@@ -16,7 +16,7 @@ Human takeover and context, authorization or suppression changes fence pending w
 4. Persist the handoff before releasing the command. `assertCommittedHandoff` checks its digest against committed state; it cannot prove database durability or one-shot consumption. The host must atomically consume the handoff once. It is not a retry permission or an exactly-once delivery guarantee.
 5. Record authenticated provider outcomes. Crash/timeout/transport uncertainty must become `markUncertain` or an unknown outcome. After an execution crash, use the committed handoff to mark uncertainty, never resend it. Reconciliation is read-only and rate limited. Missing records leave the send uncertain. An uncertain recipient blocks fresh intents even under a new grant.
 
-If takeover commits before handoff, the old dispatch candidate loses revision comparison and the ticket is cancelled. If handoff commits first, takeover reports the handoff as unrecallable; it does not claim to retract an external send. Tests exercise both orderings. No database transaction or one-shot gateway is supplied by this foundation.
+If takeover commits before handoff, the old dispatch candidate loses revision comparison and the ticket is cancelled. If handoff commits first, takeover reports the handoff as unrecallable; it does not claim to retract an external send. Tests exercise both orderings. The original pure foundation leaves persistence to its host. The optional COE-003 durable adapter supplies transactional state/checkpoint storage and one-shot handoff consumption; external transport remains a separate host responsibility.
 
 Input IDs bind canonical command content, actor ID/kind and purpose. Replays return their original result without new effects. Reuse under different content or authority fails closed. Provider reply IDs also bind exact evidence and thread identity.
 
@@ -36,10 +36,14 @@ There is no live-provider enablement switch or deployed gateway in this package.
 
 ## Verification and registry
 
-`registry/prs.json` is the single canonical plan, using Identity's shared `pr-contract.mjs` format. COE-001 is the merged foundation mapped to real PR #1. COE-002 is the second bounded SDK unit mapped to real PR #2, depending on COE-001. A mapped PR, an implementation, passing local tests, CI success, merge and operational acceptance are distinct. `registry/roadmap.json` is retired, with no second unit list.
+`registry/prs.json` is the single canonical plan, using Identity's shared `pr-contract.mjs` format. COE-001 is the merged foundation mapped to real PR #1. COE-002 is the merged synchronization SDK mapped to PR #2. COE-003 is the bounded persistence unit mapped to PR #3, depending on COE-002 and upstream ESP-002. A mapped PR, an implementation, passing local tests, CI success, merge and operational acceptance are distinct. `registry/roadmap.json` is retired, with no second unit list.
 
 `npm run check` validates strict source/tests, fake integration, authorization failures, takeover race orderings, stale tickets, optouts, grant limits, reply evidence, no-retry uncertainty, protocol encodings, registry structure and the pinned contract hash. CI runs the same command on Node 24 from `npm ci`. No live provider or deployment acceptance has been performed.
 
 ## Provider mailbox synchronization
 
 The SDK in `sync.ts` uses a read-only injected transport and a transactional store interface. It atomically persists each normalized provider page, unverified reply ingestion and cursor with both mailbox and sync revision comparisons. Official endpoint sources, limits, epoch and account fences, stale-cursor recovery and quarantine behavior are documented in [SYNC.md](SYNC.md). Provider metadata updates never authorize outbound sends.
+
+## Durable adapter
+
+[COE-003 persistence contract](DURABILITY.md) describes the generic KV wrapper, storage/domain/checkpoint revisions, generation fences, replay-validated ingress and durable one-shot consumption. It imports only the pinned SDK public database export and requires a dedicated correspondence database. PGlite uses the installed actual migration and restricted embedded session; this is not evidence of multi-session network database acceptance.

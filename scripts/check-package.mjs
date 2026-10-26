@@ -15,9 +15,22 @@ try {
   assert.ok(!archive.files.some(file => file.path.startsWith('src/') || file.path.startsWith('node_modules/')));
   const consumer = join(temporary, 'consumer');
   await mkdir(consumer);
-  await writeFile(join(consumer, 'package.json'), JSON.stringify({ name: 'correspondence-consumer', private: true, type: 'module' }));
-  execFileSync('npm', ['install', '--offline', '--no-audit', '--no-fund', join(temporary, archive.filename)],
-    { cwd: consumer, stdio: 'pipe' });
+  const archivePath = join(temporary, archive.filename);
+  const packageManifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
+  const rootLock = JSON.parse(await readFile(join(root, 'package-lock.json'), 'utf8'));
+  const consumerManifest = { name: 'correspondence-consumer', version: '1.0.0', private: true, type: 'module',
+    dependencies: { [packageManifest.name]: `file:${archivePath}` } };
+  await writeFile(join(consumer, 'package.json'), JSON.stringify(consumerManifest));
+  // npm ci caches exact tarballs, not necessarily registry packuments. Retain its exact production
+  // closure so this second install needs no metadata request and still tests the real pinned SDK.
+  const production = Object.fromEntries(Object.entries(rootLock.packages).filter(([path, item]) => path && !item.dev));
+  const packages = { '': { name: consumerManifest.name, version: consumerManifest.version, dependencies: consumerManifest.dependencies },
+    ...production, [`node_modules/${packageManifest.name}`]: { version: packageManifest.version,
+      resolved: `file:${archivePath}`, integrity: archive.integrity, dependencies: packageManifest.dependencies,
+      engines: packageManifest.engines } };
+  await writeFile(join(consumer, 'package-lock.json'), JSON.stringify({ name: consumerManifest.name, version: consumerManifest.version,
+    lockfileVersion: 3, requires: true, packages }));
+  execFileSync('npm', ['ci', '--offline', '--no-audit', '--no-fund'], { cwd: consumer, stdio: 'pipe' });
   const installed = join(consumer, 'node_modules/@accountability/correspondence');
   const manifest = JSON.parse(await readFile(join(installed, 'package.json'), 'utf8'));
   assert.equal(manifest.exports['.'].default, './dist/index.js');
