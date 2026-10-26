@@ -1,0 +1,13 @@
+# Foundation review and validation
+
+Reviewed within the bounded COE-001 foundation: the recovered transition state machine, authority checks, grant accounting, dispatch fences, projections, reply ingress, encoders, outcome parsing and fake provider behavior. This is a source review with local automated evidence, not independent certification or live operational acceptance.
+
+The recovered research template claimed an upstream product was in use. The standalone renderer now identifies only the configured brand and explicitly discloses that the inquiry is automated. The default brand is Correspondence Engine. All Mail now excludes trash/spam while their dedicated views remain available. Regression tests cover both fixes.
+
+Thirty tests cover draft defaults, structured content bounds, actor restrictions, scoped projections, search/pagination, projection isolation, both takeover race orderings, fresh human approval after takeover, draft/context/reply/revoke/disconnect/trash fences, ticket expiry, committed handoff digest, idempotency and scope failures, grant activation/expiry/ceilings/reservations, cooldown and followups, optouts, untrusted reply claims and duplicate provider evidence, late old-account auth denial, uncertain outcomes with no blind retry, read-only reconciliation, provider protocol fixtures, Unicode MIME encoding and canonical registry validation.
+
+`npm ci` and `npm run check` pass locally on Node 24.22.1. Checks include strict TypeScript, compiled ESM and declaration build, canonical registry validation, the pinned Identity contract hash, packing the package and installing it into a fresh consumer. The consumer loads both public exports from `node_modules`, runs the fictional integration fixture and needs no monorepo source. The package has no production dependencies.
+
+GitHub Actions passed on package checkpoint `9af10f790c3f02e08a924a719cd07d796171bfb8`: [run 40382958893](https://github.com/neophilism/Correspondence-and-Outreach-Engine/actions/runs/40382958893). That run predates the final installed-package and registry regression tests; their current CI status must be read from GitHub for the latest PR head. No merge or live acceptance is claimed.
+
+The host must authenticate contexts, scope persisted state, enforce atomic revision comparison, persist effect bookkeeping and consume committed handoffs once. In particular, `assertCommittedHandoff` checks a supplied state snapshot and does not create durable storage or one-shot delivery. No real provider transport is included. Provider protocol descriptions are fake-tested and retain the threading/pagination limitations described in `ARCHITECTURE.md`.

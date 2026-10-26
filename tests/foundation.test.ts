@@ -99,6 +99,26 @@ test('handoff wins first: takeover reports an unrecallable send and never resend
   assert.equal(h.state.messages.length, 1);
 });
 
+test('after takeover, a human can review a draft and approve a fresh human-scoped handoff', () => {
+  const h = harness('handoff');
+  h.step({ type: 'setControl', mode: 'human' });
+  h.step({ type: 'reviseDraft', draftId: 'alpha-draft', expectedVersion: 1,
+    content: { kind: 'human', subject: 'Record availability', body: 'Could you share the publication schedule?' } });
+  h.step({ type: 'issueGrant', grant: { id: 'human-grant', mode: 'human', actorIds: [h.human.actor.id],
+    recipients: ['records@beta.example'], purpose: h.human.purpose, notBefore: h.human.now,
+    expiresAt: '2030-01-02T00:00:00Z', maxSends: 1, maxFollowups: 0, cooldownMs: 86_400_000 } });
+  assert.throws(() => h.step({ type: 'queueDraft', draftId: 'alpha-draft', expectedVersion: 2,
+    intentId: 'agent-approval', grantId: 'human-grant' }, h.agent), error('actor_denied'));
+  h.step({ type: 'queueDraft', draftId: 'alpha-draft', expectedVersion: 2, intentId: 'human-intent', grantId: 'human-grant' });
+  const prepared = h.step({ type: 'prepareDispatch', intentId: 'human-intent' }, h.gateway);
+  const handed = h.step({ type: 'handoff', intentId: 'human-intent', ticketId: prepared.result.ticketId! }, h.gateway);
+  assert.equal(handed.gatewayCommands.length, 1);
+  const send = handed.gatewayCommands[0] as ReturnType<typeof h.send>;
+  assert.equal(send.envelope.body, 'Could you share the publication schedule?');
+  assert.equal(send.provider, 'fake');
+  assertCommittedHandoff(h.state, send);
+});
+
 test('draft revision, reply, context change, revoke, disconnect and trash fence pending sends', () => {
   const changes: TestCommand[] = [
     { type: 'setResearchContext', contextLabel: 'New context' },

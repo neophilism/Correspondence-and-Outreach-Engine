@@ -27,10 +27,15 @@
         "Standalone strict TypeScript package and Node 24 CI"
       ],
       "acceptanceCriteria": "Standalone npm ci and npm run check pass on Node 24; adversarial tests verify each foundation control. CI, merge and live operational acceptance remain separate. No live transport is shipped.",
-      "implementationStatus": "in-progress",
+      "implementationStatus": "implemented",
       "evidence": {
-        "localChecks": "26 tests, strict typecheck, declaration build and registry validation passed on Node 24.22.1",
-        "ci": "pending",
+        "localChecks": "30 tests, strict typecheck, declaration build, canonical registry validation, pinned contract hash and installed compiled ESM package smoke passed on Node 24.22.1",
+        "ci": {
+          "commit": "9af10f790c3f02e08a924a719cd07d796171bfb8",
+          "conclusion": "success",
+          "url": "https://github.com/neophilism/Correspondence-and-Outreach-Engine/actions/runs/40382958893",
+          "scope": "Prior package checkpoint: 26 tests and package build. Later package-smoke additions require a fresh CI run."
+        },
         "merged": false,
         "liveAcceptance": "not-performed"
       }

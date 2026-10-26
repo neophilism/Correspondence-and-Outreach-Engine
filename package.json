@@ -18,8 +18,9 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/*.test.ts",
-    "check": "npm run typecheck && npm test && npm run build && node scripts/validate-pr-registry.mjs && node scripts/verify-contracts.mjs",
+    "test": "node --test tests/*.test.ts tests/*.test.mjs",
+    "test:package": "node scripts/check-package.mjs",
+    "check": "npm run typecheck && npm test && npm run build && node scripts/validate-pr-registry.mjs && node scripts/verify-contracts.mjs && npm run test:package",
     "build": "tsc -p tsconfig.build.json",
     "prepare": "npm run build"
   },
