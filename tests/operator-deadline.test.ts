@@ -117,3 +117,49 @@ test("successful and rejected authentication close their owned signals and sanit
     assert.equal((await result.text()).includes("private-credential"), false);
   }
 });
+
+test("late async results and slow clones cannot resume writes, and malformed contexts fail privately", async (t) => {
+  const f = await fixture(t);
+  for (const mode of ["async", "clone", "context"]) {
+    let release!: () => void, owned: AbortSignal | undefined;
+    const ready = new Promise<void>((r) => {
+      release = r;
+    });
+    const handler = createOperatorHandler(
+      f.repo,
+      {
+        authenticate: async (_m, s) => {
+          owned = s;
+          if (mode === "async") await ready;
+          if (mode === "clone")
+            return {
+              get context() {
+                block();
+                return human;
+              },
+              csrfToken: csrf,
+            };
+          if (mode === "context")
+            return {
+              context: {
+                ...human,
+                actor: {
+                  ...human.actor,
+                  roles: Array(129).fill("correspondence:read"),
+                },
+              },
+              csrfToken: csrf,
+            };
+          return { context: human, csrfToken: csrf };
+        },
+      },
+      { ...policy, authenticationTimeoutMs: mode === "context" ? 2000 : 10 },
+    );
+    const response = await handler(post(JSON.stringify(envelope)));
+    assert.equal(response.status, 503, mode);
+    assert.equal(owned?.aborted, true);
+    release();
+    await new Promise<void>((r) => setImmediate(r));
+    assert.equal((await f.repo.load(human, "mailbox")).revision, 1);
+  }
+});

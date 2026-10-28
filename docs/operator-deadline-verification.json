@@ -1,0 +1,24 @@
+{
+  "reproducedOn": "12f45d60eae22c13d513933f840b63ae673a7021",
+  "oldRegressionGroupsFailed": 4,
+  "localTests": 97,
+  "installedNewGroups": 5,
+  "installedCompiledJS": "byte-matched build",
+  "initialCi": {
+    "source": "5ff910657022bbe414d82db7ca89986bb8efa6c4",
+    "run": 40730832075,
+    "job": 122966362437,
+    "tests": 96,
+    "logsInspected": true
+  },
+  "sourceSha256": {
+    "src/operator.ts": "acee4fb0da67b4d19a2902dbd77bb90f177308790044fd45952448d6cb64ef92",
+    "tests/operator-deadline.test.ts": "5e5675b3902bdc022faa83d00f72f876b5bb5369f85523507d33c492c51f2a16",
+    "tests/operator.test.ts": "2f0a8987c0a499db190396fad1368f44bbcccb7ad68fe9203b0aba68b7ffdad1"
+  },
+  "remaining": [
+    "Final-head CI/merge",
+    "Trusted current host identity/session/roles/time/CSRF and SQL driver limits",
+    "No new SQL-network/provider/browser/AT/live qualification; cannot preempt JS or undo effects/begun SQL"
+  ]
+}
