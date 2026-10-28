@@ -51,3 +51,5 @@ The SDK in `sync.ts` uses a read-only injected transport and a transactional sto
 ## Private human operator adapter
 
 COE-004 adds the optional [private operator gateway](OPERATOR.md) over the existing durable repository. It requires an authenticated host session and scoped CSRF binding, limits exposed commands to private drafts/flags/restriction/cancellation/human takeover, and never returns gateway commands. Live auth/hosting and Visual command UI integration remain separate.
+
+Operator HTTP deadline checks now include monotonic stage/result gates and owned-auth-signal closure. Four actual restricted-migration regressions reproduce late session/command/body acceptance and unclosed success signals on prior accepted main; OPERATOR.md records limits. This is local admission hardening, not authentication proof, deployed identity or SQL cancellation.

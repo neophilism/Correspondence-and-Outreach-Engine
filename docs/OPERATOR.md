@@ -34,3 +34,11 @@ The Visual inbox's read-only snapshot is separately implemented. Connecting auth
 ## Validation and limits
 
 Targeted tests use actual SDK migrations and a restricted PGlite login for draft edits, stale revisions, takeover on both sides of handoff and lost-acknowledgement replay. Admission tests cover origin, human scope/roles, CSRF, arbitrary command/authority fields, timeouts, cancellation, content types and stream limits. Installed-package smoke imports the compiled operator subpath and confirms an unauthenticated request cannot touch the repository. PGlite is not independent network-session PostgreSQL acceptance. Real host authentication, TLS/proxy configuration, browser integration/accessibility, production database sessions and operational acceptance remain separate.
+
+## Monotonic HTTP admission checkpoint
+
+The operator authentication and body stages now check a monotonic deadline before/after callback invocation, metadata copying, result copying/context validation, stream reads and UTF8 JSON parsing. Owned authentication signals close on every exit, including success. Authenticated context strings/time/roles are bounded before read authority is accepted. Existing routes, auth-before-body order, CSRF/domain checks and draft/human-control command whitelist remain unchanged.
+
+Four actual restricted-migration/native-Fetch regressions FAILED on accepted main12f45d60eae22c13d513933f840b63ae673a7021: blocked authentication returned a session/committed a command after10ms deadline, blocked body read committed before delayed timer (200 rather than503/408), and successful authentication left its signal open. The tests use fictional local data and40ms synchronous callback blocking, not deployed authentication. Source/checkpoint validation is separate from final CI/merge and live acceptance.
+
+Checks deny late acceptance; they cannot preempt JavaScript, undo callbacks, terminate an already-begun database transaction or establish rollback. Begun SQL remains awaited, and acknowledgement loss remains unknown. Trusted current host roles/session/CSRF/purpose/clock, database driver/concurrency/ingress limits and live qualification remain mandatory. No sending, provider network requests, resume, grants, publication or new routes are added.

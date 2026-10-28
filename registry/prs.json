@@ -4,7 +4,7 @@
   "roadmapVersion": 4,
   "planVerified": true,
   "plannedPrCount": 4,
-  "observedAt": "2026-10-26T20:56:12Z",
+  "observedAt": "2026-10-28T16:54:58Z",
   "units": [
     {
       "id": "COE-001",
@@ -133,12 +133,13 @@
         "Restricted-login persistence integration and compiled package acceptance"
       ],
       "acceptanceCriteria": "Meaningful real-migration tests verify draft edits, scope/session/CSRF denial, strict no-effect command whitelist, deadlines, takeover ordering, lost acknowledgement replay and installed compiled ESM. CI and host/live acceptance remain separate.",
-      "implementationStatus": "implemented",
+      "implementationStatus": "Partial: accepted private operator handler; monotonic HTTP stage/result admission and owned-signal cleanup now cover reproduced late-auth/body regressions. Host authentication/current policy/driver/production qualification remains pending.",
       "evidence": {
         "localChecks": "92 tests including 7 operator admission/persistence tests, strict typecheck, compiled ESM build, canonical registry and pinned contracts/dependency verification plus installed-package smoke. Full local check passed; current-head CI remains pending.",
         "ci": "Pending final-head observation",
         "merged": false,
-        "liveAcceptance": "not-performed"
+        "liveAcceptance": "not-performed",
+        "deadlineCheckpoint": "Four new actual restricted-migration/native-Fetch regressions failed on prior accepted main12f45d60eae22c13d513933f840b63ae673a7021; source now adds monotonic gates and signal cleanup. Current local/full CI/merge acceptance tracked separately in PR."
       }
     }
   ],

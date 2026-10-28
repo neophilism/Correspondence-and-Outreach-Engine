@@ -384,7 +384,8 @@ test("body and authentication deadlines cancellation malformed content and size 
     body: emptyStream,
     duplex: "half",
   } as RequestInit);
-  assert.equal((await handler(empty)).status, 413);
+  // Count admission gets its own generous budget; deadline rejection is tested separately below.
+  assert.equal((await createOperatorHandler(repo, auth, policy)(empty)).status, 413);
   assert(emptyCancelled);
   assert(emptyReads <= 4100);
   let cancelled = false;
