@@ -4,7 +4,7 @@
   "roadmapVersion": 4,
   "planVerified": true,
   "plannedPrCount": 4,
-  "observedAt": "2026-10-26T20:56:12Z",
+  "observedAt": "2026-10-28T16:58:11Z",
   "units": [
     {
       "id": "COE-001",
@@ -120,7 +120,9 @@
       "prs": [
         4
       ],
-      "contributingPrs": [],
+      "contributingPrs": [
+        6
+      ],
       "dependsOn": [
         "COE-003"
       ],
@@ -133,12 +135,14 @@
         "Restricted-login persistence integration and compiled package acceptance"
       ],
       "acceptanceCriteria": "Meaningful real-migration tests verify draft edits, scope/session/CSRF denial, strict no-effect command whitelist, deadlines, takeover ordering, lost acknowledgement replay and installed compiled ESM. CI and host/live acceptance remain separate.",
-      "implementationStatus": "implemented",
+      "implementationStatus": "Partial: accepted private operator handler; monotonic HTTP stage/result admission and owned-signal cleanup now cover reproduced late-auth/body regressions. Host authentication/current policy/driver/production qualification remains pending.",
       "evidence": {
-        "localChecks": "92 tests including 7 operator admission/persistence tests, strict typecheck, compiled ESM build, canonical registry and pinned contracts/dependency verification plus installed-package smoke. Full local check passed; current-head CI remains pending.",
-        "ci": "Pending final-head observation",
-        "merged": false,
-        "liveAcceptance": "not-performed"
+        "localChecks": "97 ordinary tests/typecheck/build/registry/pinned contracts/dependency checks and installed package smoke pass. All five new restricted-migration HTTP groups also pass installed compiled public exports with JS byte-match.",
+        "ci": "Accepted PR4 final-head CI40400595479 on97778c1212a02194e61a27f53b928f098af81b88, actual merged state rechecked. PR6 acceptance separately pending final-head checks.",
+        "merged": true,
+        "liveAcceptance": "not-performed",
+        "deadlineCheckpoint": "PR6: four regressions failed on old accepted main, fifth late-async/slow-clone/malformed-context group added. Initial source5ff910657022bbe414d82db7ca89986bb8efa6c4 CI40730832075/job122966362437 passed96tests/full checks/installed smoke, logs inspected. Latest97local/five installed groups pass; final-head CI required. No network/live qualification.",
+        "mergeCommit": "12f45d60eae22c13d513933f840b63ae673a7021"
       }
     }
   ],

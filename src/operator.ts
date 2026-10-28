@@ -4,6 +4,8 @@ import {
   invariant,
   requireScope,
   validateRef,
+  nonempty,
+  validTime,
 } from "./contracts.ts";
 import type { Context, Scope } from "./contracts.ts";
 import type { CorrespondenceRepository } from "./durable.ts";
@@ -144,6 +146,19 @@ async function authenticate(
   timeoutMs: number,
 ): Promise<OperatorSession> {
   const controller = new AbortController();
+  const expires = performance.now() + timeoutMs;
+  function gate() {
+    invariant(
+      !controller.signal.aborted,
+      "request_aborted",
+      "Request cancelled",
+    );
+    invariant(
+      performance.now() < expires,
+      "authentication_unavailable",
+      "Authentication deadline exceeded",
+    );
+  }
   let timer: ReturnType<typeof setTimeout> | undefined;
   let timedOut = false;
   let onCancel = () => {};
@@ -156,6 +171,7 @@ async function authenticate(
       "request_aborted",
       "Request cancelled",
     );
+    gate();
     const session = await Promise.race([
       Promise.resolve()
         .then(() => {
@@ -164,16 +180,21 @@ async function authenticate(
             "request_aborted",
             "Request cancelled",
           );
-          return auth.authenticate(
-            {
-              url: request.url,
-              method: request.method,
-              headers: new Headers(request.headers),
-            },
-            controller.signal,
-          );
+          gate();
+          const metadata = {
+            url: request.url,
+            method: request.method,
+            headers: new Headers(request.headers),
+          };
+          gate();
+          return auth.authenticate(metadata, controller.signal);
         })
-        .then((value) => (value === null ? null : structuredClone(value)))
+        .then((value) => {
+          gate();
+          const captured = value === null ? null : structuredClone(value);
+          gate();
+          return captured;
+        })
         .catch(() => {
           throw new DomainError(
             "authentication_unavailable",
@@ -200,7 +221,36 @@ async function authenticate(
       "request_aborted",
       "Request cancelled",
     );
+    gate();
     invariant(session, "authentication_required", "Authentication required");
+    try {
+      const c = session.context;
+      for (const value of [
+        c.tenantId,
+        c.projectId,
+        c.purpose,
+        c.requestId,
+        c.actor.id,
+      ])
+        nonempty(value, "Authenticated context", 200);
+      nonempty(c.now, "Authenticated time", 64);
+      validTime(c.now);
+      invariant(
+        Array.isArray(c.actor.roles) &&
+          c.actor.roles.length <= 128 &&
+          c.actor.roles.every(
+            (role) => typeof role === "string" && role.length <= 128,
+          ),
+        "authentication_unavailable",
+        "Invalid roles",
+      );
+    } catch {
+      throw new DomainError(
+        "authentication_unavailable",
+        "Invalid authenticated context",
+      );
+    }
+    gate();
     invariant(
       session.context.actor.kind === "human",
       "actor_denied",
@@ -217,11 +267,13 @@ async function authenticate(
       "authentication_unavailable",
       "Session binding is invalid",
     );
+    gate();
     return session;
   } finally {
     if (timer) clearTimeout(timer);
     request.signal.removeEventListener("abort", abort);
     controller.signal.removeEventListener("abort", onCancel);
+    controller.abort();
   }
 }
 async function body(request: Request, timeoutMs: number): Promise<unknown> {
@@ -241,6 +293,15 @@ async function body(request: Request, timeoutMs: number): Promise<unknown> {
     );
   invariant(request.body, "invalid_request", "Request body required");
   const reader = request.body.getReader();
+  const expires = performance.now() + timeoutMs;
+  function gate() {
+    invariant(!request.signal.aborted, "request_aborted", "Request cancelled");
+    invariant(
+      performance.now() < expires,
+      "body_timeout",
+      "Request body deadline exceeded",
+    );
+  }
   let timer: ReturnType<typeof setTimeout> | undefined;
   let cancel: () => void = () => {};
   const deadline = new Promise<never>((_, reject) => {
@@ -261,7 +322,9 @@ async function body(request: Request, timeoutMs: number): Promise<unknown> {
     let bytes = 0;
     let chunkCount = 0;
     for (;;) {
+      gate();
       const result = await Promise.race([reader.read(), deadline]);
+      gate();
       if (result.done) break;
       invariant(
         ++chunkCount <= 4096,
@@ -276,13 +339,17 @@ async function body(request: Request, timeoutMs: number): Promise<unknown> {
       );
       chunks.push(new Uint8Array(result.value));
     }
+    gate();
+    let parsed: unknown;
     try {
-      return JSON.parse(
+      parsed = JSON.parse(
         new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks)),
       );
     } catch {
       throw new DomainError("invalid_request", "Invalid UTF8 JSON");
     }
+    gate();
+    return parsed;
   } finally {
     if (timer) clearTimeout(timer);
     request.signal.removeEventListener("abort", cancel);
